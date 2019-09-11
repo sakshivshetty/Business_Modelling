@@ -1,2 +1,2 @@
 # Business_Modelling
-Introduction to business modelling and the way MNCs work.
+Data Analytics using R programming language.
