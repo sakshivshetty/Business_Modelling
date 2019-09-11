@@ -1,0 +1,86 @@
+---
+title: "DATA ANALYTICS WITH R - PROJECT"
+author: "Nikitha Jayakumar, Sakshi Shetty"
+date: "3/1/2019"
+output: html_document
+---
+
+For this project, we shall be building a model to predict the values of the attribute suicide number.
+
+```{r}
+dataset <- read.csv("C:\\Users\\Nikitha\\Documents\\PESU IO\\Project\\who_suicide_statistics.csv")
+```
+
+The dataset is chosen such that suicide statistics is considered for the years after 2000 and of those countries where population is given.
+Hence, following will be the dataset:
+
+```{r}
+data <- subset(dataset,year>=2000 & is.na(population)==FALSE)
+```
+
+Preprocessing the data:
+
+Filling in the missing values with mean.
+
+```{r}
+data$suicides_no[is.na(data$suicides_no)] <- mean(data$suicides_no, na.rm=TRUE)   
+```
+
+Finding the correlation between numeric attributes:
+
+```{r}
+sapply(data, class)
+print(cor(data[c("year","suicides_no","population")]))
+```
+
+As can be seen by the correlation matrix, the correlation is highest between suicides_no and population; leading to the inference that there are a higher number of suicides in larger populations.
+Thus, the attribute population must be included in the regression model.
+
+
+To determine the relations between categorical variables and the target:
+
+By visulaising the scatter plot, 
+1. It becomes evident that the suicide rate is highest for the age group 35-45       years.
+2. Rate of suicide is higher in males than females.
+3. Starting from the year 2000, suicides seemed to have peaked between the years     2000 and 2001 and then show a gradual decrease to an almost constant level        between 2010-2015.
+
+From the plots, it can be seen that the attributes of age, sex, country and year will have to be considered for the regression model.
+
+```{r}
+library(plotly)
+print(plot_ly(data,x=~age,y=~suicides_no,trace="scatter"))
+print(plot_ly(data,x=~sex,y=~suicides_no,trace="scatter"))
+print(plot_ly(data,x=~year,y=~suicides_no,trace="scatter",mode="lines"))
+print(plot_ly(data,x=~country,y=~suicides_no,trace="scatter"))
+```
+
+
+
+To split the data into training and testing sets using 80:20 split.
+
+```{r}
+train_index <- sample(floor(nrow(data)*0.8))
+train<- data[train_index,]
+test <- data[-train_index,]
+```
+
+To build the regression model.
+
+```{r}
+model <- lm(suicides_no~sex+population+year+country+age,train)
+```
+
+To predict values using the model built.
+
+```{r}
+pred <- predict(model,data=test)
+```
+
+To calculate coefficient of determination and plot graphs for the model.
+
+```{r}
+summary(model)
+plot(model)
+plot(residuals(model))
+```
+
